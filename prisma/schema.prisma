@@ -1,0 +1,128 @@
+// Naze AI — database schema (spec §31).
+//
+// Actively used: User, Conversation, Message (Phase 4), Memory (Phase 5),
+// GeneratedImage (Phase 6), Setting (Phase 8).
+// VoiceSession and Attachment are still declared but unused — Naze Call
+// (Phase 7) turned out not to need a persisted VoiceSession row, and
+// Attachment awaits a real file-upload feature. Nothing in the app
+// claims those two work; the tables just exist, empty.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Two URLs on purpose: DATABASE_URL is the pooled connection (Supavisor/
+// PgBouncer) that Prisma Client uses at runtime — required in serverless
+// environments like Vercel so each function invocation doesn't open its
+// own direct Postgres connection. DIRECT_URL bypasses the pooler and is
+// what `prisma db push` / `prisma migrate` use, since the pooler doesn't
+// support the schema-changing commands those need.
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// A browser/session identity. Not real authentication (that's Phase 8) —
+/// today this row is created the first time a visitor hits the app and is
+/// tracked via an anonymous httpOnly cookie (see lib/security/session.ts).
+/// When real auth lands, this becomes the row a login attaches to instead
+/// of being replaced.
+model User {
+  id            String         @id @default(cuid())
+  createdAt     DateTime       @default(now())
+  conversations Conversation[]
+  memories      Memory[]
+  setting       Setting?
+
+  @@map("users")
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String    @default("Percakapan baru")
+  archived  Boolean   @default(false)
+  pinned    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  messages  Message[]
+
+  @@index([userId, archived, updatedAt])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // "user" | "assistant"
+  content        String       @db.Text
+  model          String?
+  createdAt      DateTime     @default(now())
+  metadata       Json?
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+/// Long-term memory (spec §11), Phase 5.
+model Memory {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content    String   @db.Text
+  category   String?
+  importance Int      @default(1)
+  confidence Float?
+  sourceConversationId String?
+  relevance  Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@map("memories")
+}
+
+/// One row per generated image, Phase 6.
+model GeneratedImage {
+  id             String   @id @default(cuid())
+  conversationId String
+  prompt         String   @db.Text
+  url            String
+  createdAt      DateTime @default(now())
+
+  @@map("generated_images")
+}
+
+/// Schema only — Phase 7.
+model VoiceSession {
+  id             String    @id @default(cuid())
+  conversationId String
+  startedAt      DateTime  @default(now())
+  endedAt        DateTime?
+
+  @@map("voice_sessions")
+}
+
+/// Schema only — Phase 6/7 (attachments on messages).
+model Attachment {
+  id        String   @id @default(cuid())
+  messageId String
+  url       String
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  @@map("attachments")
+}
+
+/// Per-user preferences (spec §27), Phase 8.
+model Setting {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data   Json
+
+  @@map("settings")
+}

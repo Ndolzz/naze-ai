@@ -1,0 +1,44 @@
+name: CI
+
+# Runs on every push and PR so problems show up as a red X on GitHub
+# itself — the only reliable way to debug this app without a working
+# local `npm install`/`npm run build` (Prisma doesn't run on Termux/
+# Android, see README). This workflow never touches the real database:
+# it uses a fake DATABASE_URL/DIRECT_URL just so `prisma generate` has
+# something to point at, and calls `build:ci` (plain `next build`), not
+# `build` (which runs `prisma db push` against the real Supabase
+# instance — that stays exclusive to Vercel's actual deploy, which has
+# the real secrets).
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://user:password@localhost:5432/naze_ci"
+      DIRECT_URL: "postgresql://user:password@localhost:5432/naze_ci"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build:ci

@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Naze design tokens
+  ------------------
+  Dark is the primary surface (see spec §28). Values are deliberately not
+  pure black / pure white — a near-navy canvas keeps the blue-violet accent
+  from turning into an "acid accent on #000" cliché, and gives the UI a
+  slight warmth instead of a flat SaaS-dashboard gray.
+*/
+
+:root,
+[data-theme="dark"] {
+  --naze-canvas: #0b0d14;
+  --naze-surface: #12141d;
+  --naze-surface-raised: #1a1d29;
+  --naze-border: #22283a;
+  --naze-border-strong: #2f3650;
+  --naze-ink: #eef0f8;
+  --naze-ink-muted: #9aa0b8;
+  /* Was #5c6280 (~3.1:1 on surface) — failed WCAG AA for the normal
+     body text it's actually used as (empty states, descriptions,
+     labels), not just icons/borders. Same hue, lightened to clear
+     4.5:1 on both canvas and surface. */
+  --naze-ink-faint: #79809f;
+  --naze-accent: #6a5cff;
+  --naze-accent-hover: #7d70ff;
+  --naze-accent-soft: rgba(106, 92, 255, 0.14);
+  /* Text-safe variant of --naze-accent (4.24:1 — fine for icons/buttons,
+     which only need 3:1, but not quite 4.5:1 for the small link/label
+     text a couple of components set in this color). */
+  --naze-accent-text: #8175ff;
+  --naze-accent-2: #4a7dff;
+  --naze-success: #34c98e;
+  --naze-warning: #e2a63b;
+  --naze-danger: #ef5a6f;
+}
+
+[data-theme="light"] {
+  --naze-canvas: #f7f7fb;
+  --naze-surface: #ffffff;
+  --naze-surface-raised: #ffffff;
+  --naze-border: #e4e5ef;
+  --naze-border-strong: #d2d4e4;
+  --naze-ink: #14151f;
+  --naze-ink-muted: #5a5d75;
+  /* Was #8a8da3 (~3.27:1 on white) — same AA failure as the dark theme,
+     fixed the same way. */
+  --naze-ink-faint: #6c6f89;
+  --naze-accent: #5b4bf0;
+  --naze-accent-hover: #4c3ce0;
+  --naze-accent-soft: rgba(91, 75, 240, 0.1);
+  /* Already ≥4.5:1 on white, so no separate text variant needed here. */
+  --naze-accent-text: #5b4bf0;
+  --naze-accent-2: #3a63e8;
+  --naze-success: #1f9d6f;
+  --naze-warning: #b3791f;
+  --naze-danger: #d13a4f;
+}
+
+* {
+  border-color: var(--naze-border);
+}
+
+html {
+  color-scheme: dark;
+}
+[data-theme="light"] html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--naze-canvas);
+  color: var(--naze-ink);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* One deliberate, visible focus treatment used everywhere instead of the
+   browser default outline or a removed outline. */
+:focus-visible {
+  outline: 2px solid var(--naze-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background-color: var(--naze-accent-soft);
+  color: var(--naze-ink);
+}
+
+/*
+  Syntax highlighting (rehype-highlight / highlight.js class names).
+  Mapped to Naze tokens directly rather than importing a stock hljs theme,
+  so code blocks never clash with the rest of the palette.
+*/
+.hljs {
+  color: var(--naze-ink);
+  background: transparent;
+}
+.hljs-comment,
+.hljs-quote {
+  color: var(--naze-ink-faint);
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-operator {
+  color: var(--naze-accent-2);
+}
+.hljs-string,
+.hljs-attr,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+  color: var(--naze-success);
+}
+.hljs-number,
+.hljs-name,
+.hljs-tag {
+  color: var(--naze-accent);
+}
+.hljs-title,
+.hljs-function_,
+.hljs-section {
+  color: var(--naze-ink);
+  font-weight: 600;
+}
+.hljs-built_in,
+.hljs-type,
+.hljs-attribute {
+  color: var(--naze-warning);
+}
+.hljs-deletion {
+  color: var(--naze-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
