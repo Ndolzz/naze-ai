@@ -17,19 +17,31 @@ npm run dev
 `DATABASE_URL` needs a Postgres connection string — any of Neon, Supabase,
 or Vercel Postgres's free tiers work. If you're on **Supabase**
 specifically, you need two URLs (Project Settings → Database →
-Connection string):
+Connection string, or the "Connect" button at the top of the project
+dashboard):
 
 ```
 DATABASE_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres:<password>@db.<project-ref>.supabase.co:5432/postgres"
+DIRECT_URL="postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
 ```
 
-`DATABASE_URL` (the pooled one, port 6543) is what the app uses at
-runtime — required for serverless so each request doesn't open its own
-direct Postgres connection. `DIRECT_URL` (port 5432) is only used by
-`prisma db push` / `prisma migrate`, since Supabase's pooler doesn't
-support schema changes. Both are already wired up in
-`prisma/schema.prisma`.
+**Both go through the pooler — neither uses `db.<project-ref>.supabase.co`
+directly.** That's not a typo: newer Supabase projects only hand out an
+IPv6 address for the true "Direct connection" option, and Vercel's
+functions can't make outbound IPv6 connections at all, so anything using
+that host fails with `P1001: Can't reach database server` no matter how
+correct the password is. The fix is the **Session pooler** string (port
+`5432`) for `DIRECT_URL` instead of the raw direct connection — it's
+still a full, unpooled-enough connection for `prisma db push` /
+`migrate`, but it's IPv4 the whole way through Supavisor. `DATABASE_URL`
+(the **Transaction pooler**, port `6543`) was already going through the
+pooler and was never affected by this.
+
+`DATABASE_URL` is what the app uses at runtime — required for
+serverless so each request doesn't open its own direct Postgres
+connection. `DIRECT_URL` is only used by `prisma db push` / `prisma
+migrate`, since Supabase's transaction-mode pooler doesn't support
+schema changes. Both are already wired up in `prisma/schema.prisma`.
 
 `npm run db:push` is the quick option for solo development
 (syncs the schema directly, no migration files); switch to

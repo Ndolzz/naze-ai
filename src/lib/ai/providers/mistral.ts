@@ -1,7 +1,12 @@
 import { ChatMessage, ChatProvider, ProviderError } from "@/lib/ai/types";
 
 const MISTRAL_ENDPOINT = "https://api.mistral.ai/v1/chat/completions";
-const MODEL = "mistral-large-latest";
+// mistral-large-latest returned 403 tier_not_allowed on a fresh account
+// (Mistral's free tier doesn't reliably include Large without extra
+// account verification). mistral-small-latest is available far more
+// broadly and is plenty capable for a chat assistant — swap this one
+// constant if/when the account has Large access and it's worth the cost.
+const MODEL = "mistral-small-latest";
 
 /**
  * Talks to Mistral's OpenAI-compatible chat/completions endpoint and
