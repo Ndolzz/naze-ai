@@ -501,11 +501,16 @@ Since Termux/Android can't run `npm install` or `npm run build` at all
 way to catch a broken commit before it reaches Vercel is
 `.github/workflows/ci.yml`. It runs automatically on every push:
 
-1. **Type check** (`tsc --noEmit`) — catches TypeScript errors.
-2. **Lint** (`next lint`, now actually configured via `.eslintrc.json` —
+1. **Install** (`npm install`, not `npm ci`) — no `package-lock.json` is
+   committed, since generating an accurate one needs a real `npm
+   install` against the npm registry, which neither this project's dev
+   environment nor Termux (no network) can do. `npm install` works fine
+   without a lock file, just a bit slower with no cache.
+2. **Type check** (`tsc --noEmit`) — catches TypeScript errors.
+3. **Lint** (`next lint`, now actually configured via `.eslintrc.json` —
    it was referenced in `package.json` since Phase 1 but never had a
    config file until this phase, so it would have failed if run before).
-3. **Build** (`next build`, via the `build:ci` script) — catches
+4. **Build** (`next build`, via the `build:ci` script) — catches
    anything only a real Next.js build surfaces.
 
 **Where to see the result:** open the repo on github.com → the **Actions**

@@ -9,6 +9,13 @@ name: CI
 # `build` (which runs `prisma db push` against the real Supabase
 # instance — that stays exclusive to Vercel's actual deploy, which has
 # the real secrets).
+#
+# Deliberately uses `npm install`, not `npm ci`, and no npm cache: both
+# require a committed package-lock.json, and generating an accurate one
+# needs a real `npm install` against the npm registry — something
+# neither this project's dev environment nor Termux (no network) can
+# do. `npm install` works fine without a lock file; it's just a little
+# slower with no cache. Worth revisiting once a lock file exists.
 
 on:
   push:
@@ -29,10 +36,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Type check
         run: npm run typecheck
