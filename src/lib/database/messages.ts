@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/database/prisma";
 import { ChatMessage } from "@/lib/ai/types";
 
@@ -6,7 +7,7 @@ export async function addMessage(
   role: "user" | "assistant",
   content: string,
   model?: string,
-  metadata?: Record<string, unknown>
+  metadata?: Prisma.InputJsonValue
 ) {
   return prisma.message.create({
     data: { conversationId, role, content, model, metadata },
