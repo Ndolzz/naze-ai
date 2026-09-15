@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Sora, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import ThemeSync from "@/components/ThemeSync";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import AuthProvider from "@/components/AuthProvider";
 import "./globals.css";
 
 // Display family — used for the wordmark, section headlines and empty states.
@@ -54,9 +55,11 @@ export default function RootLayout({
       <body
         className={`${sora.variable} ${jakarta.variable} ${jetbrains.variable} font-sans antialiased`}
       >
-        <ThemeSync />
-        <ServiceWorkerRegister />
-        {children}
+        <AuthProvider>
+          <ThemeSync />
+          <ServiceWorkerRegister />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

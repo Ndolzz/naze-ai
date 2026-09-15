@@ -1,53 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/database/prisma";
-
-const COOKIE_NAME = "naze_uid";
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+import { auth } from "@/lib/auth";
 
 export interface SessionResult {
   userId: string;
-  isNew: boolean;
 }
 
 /**
- * Resolves the anonymous session behind a request, creating both the
- * backing User row and (via applySessionCookie) the cookie on first
- * visit. This is NOT authentication — spec §41 covers real sign-in in
- * Phase 8. It's just enough identity to scope "your conversations" to
- * one browser until then; when real auth lands, a login attaches to this
- * same User row rather than replacing the mechanism.
+ * Resolves the signed-in user behind a request. Real auth now
+ * (email/password via Auth.js, Phase 11) — `middleware.ts` already blocks
+ * every unauthenticated request to `/api/*` (except `/api/auth/*`)
+ * before it reaches a route handler, so by the time this runs `auth()`
+ * is guaranteed to return a session. The throw below is a defensive
+ * backstop for that invariant, not the primary gate — if it ever fires,
+ * the bug is in `middleware.ts`'s matcher, not here.
+ *
+ * Kept as an async function taking an optional (now-unused) `req`
+ * parameter so none of the ~10 route handlers that call
+ * `resolveSession(req)` needed to change.
  */
-export async function resolveSession(req: NextRequest): Promise<SessionResult> {
-  const existing = req.cookies.get(COOKIE_NAME)?.value;
-  if (existing) {
-    const user = await prisma.user.findUnique({ where: { id: existing } });
-    if (user) return { userId: user.id, isNew: false };
+export async function resolveSession(_req?: NextRequest): Promise<SessionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error(
+      "resolveSession() called with no authenticated session — an unauthenticated request reached a route handler. Check middleware.ts's matcher."
+    );
   }
-  const user = await prisma.user.create({ data: {} });
-  return { userId: user.id, isNew: true };
+  return { userId: session.user.id };
 }
 
-/** Every route that calls resolveSession must pass its response through
- *  this before returning, or a first-time visitor's cookie never gets
- *  set and a new User row is created on every request. */
-export function applySessionCookie(res: NextResponse, session: SessionResult): NextResponse {
-  if (session.isNew) {
-    res.cookies.set(COOKIE_NAME, session.userId, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: COOKIE_MAX_AGE,
-      path: "/",
-    });
-  }
+/**
+ * No-ops now. Session state lives entirely in the Auth.js JWT cookie,
+ * which NextAuth's own /api/auth/* handlers set — nothing else needs to
+ * touch it. Kept (rather than deleted) purely so the existing
+ * `applySessionCookie(res, session)` / `clearSessionCookie(res)` calls
+ * sprinkled across the API routes keep compiling unchanged.
+ */
+export function applySessionCookie(res: NextResponse, _session?: SessionResult): NextResponse {
   return res;
 }
 
-/** Used by "hapus data pengguna" (spec §40): after wiping a user's rows,
- *  also drop the cookie that points at them, so the next request starts
- *  a genuinely fresh session instead of reusing an id with nothing
- *  behind it. */
 export function clearSessionCookie(res: NextResponse): NextResponse {
-  res.cookies.delete(COOKIE_NAME);
   return res;
 }

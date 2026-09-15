@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { ArrowLeft, Download, Trash2 } from "lucide-react";
 import NazeMark from "@/components/ui/NazeMark";
 import Toggle from "@/components/ui/Toggle";
@@ -91,10 +92,9 @@ export default function SettingsPage() {
 
             <Section title="Privasi" description="Bagaimana Naze mengenali kamu saat ini.">
               <p className="px-4 py-3 text-[13.5px] leading-relaxed text-ink-muted">
-                Naze belum punya sistem akun/login — percakapan dan memori kamu terikat ke satu
-                cookie anonim di browser ini, bukan ke akun. Menghapus cookie browser berarti
-                riwayatnya tidak bisa diakses lagi (datanya tidak otomatis terhapus dari server,
-                cuma tidak lagi tersambung ke sesi manapun).
+                Percakapan dan memori kamu terikat ke akun yang login (email/
+                password), bukan lagi ke satu browser. Login dari perangkat lain dengan akun yang
+                sama akan menampilkan riwayat yang sama.
               </p>
             </Section>
 
@@ -153,7 +153,12 @@ function DataSection() {
     setBusy("everything");
     try {
       await fetch("/api/data", { method: "DELETE" });
-      window.location.href = "/";
+      // The User row itself was just deleted, so the current session JWT
+      // now points at nothing — signOut() clears it properly instead of
+      // leaving the browser holding a token for an account that no
+      // longer exists (which would otherwise 401 on the very next API
+      // call, or worse, silently attach a *new* random account to it).
+      await signOut({ callbackUrl: "/login" });
     } finally {
       setBusy(null);
     }

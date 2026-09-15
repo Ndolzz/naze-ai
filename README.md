@@ -59,6 +59,11 @@ schema changes. Both are already wired up in `prisma/schema.prisma`.
 > tables get created on first deploy — no separate step needed. Test the
 > app on the deployed URL instead of `localhost`.
 
+**Auth (Phase 11):** generate a session secret with `npx auth secret`
+(writes straight into `.env.local`). That's the only setup this needs —
+email/password sign-up is entirely `/api/auth/register`, our own route,
+with no third-party console or service in the loop.
+
 Open `http://localhost:3000`. Without `MISTRAL_API_KEY` set, sending a
 message returns a real error from the API route (not a fake response) —
 see `src/lib/ai/index.ts`. Without a reachable `DATABASE_URL`, every
@@ -500,11 +505,58 @@ placeholder.
 | History | Search, grouping, pin/archive/delete/rename all real and working. |
 | Voice | Genuinely works in Chrome/Edge; Firefox has no SpeechRecognition at all — a browser limitation, not a bug here. |
 | Image | Generation, download, regenerate all real; free provider has no SLA (stated since Phase 6). |
-| Security | Audited this phase — see above. Session-based, not account-based, until real auth exists. |
+| Security | Audited in Phase 10 — see above. Account-based since Phase 11 (email/password via Auth.js), not anonymous-cookie-based anymore. |
 | Performance | Bundle-trimmed and image-optimized in Phase 9; no further changes needed this phase. |
 | Error handling | Every provider/DB/validation failure surfaces as a real, plain-language `ErrorNotice`, never a stack trace. |
 | Accessibility | Contrast fixed this phase; keyboard/focus-visible states in place since Phase 1; not independently tested with a screen reader. |
 | Branding | The Naze mark, palette, and type pairing are consistent everywhere — sidebar, empty states, Call, PWA icon. |
+
+## Phase 11 — Real authentication
+
+Replaced the anonymous per-browser cookie (`naze_uid`) with actual
+accounts, via **Auth.js (NextAuth v5)** — chosen specifically because
+it's free with no user-count ceiling, unlike the free tiers of
+Clerk/Supabase Auth, and because `prisma/schema.prisma`'s `User` model
+was already shaped for a login to attach to it rather than replace it.
+
+Email/password only, deliberately — an earlier pass added Google OAuth
+too, but Google Cloud Console was asking for a billing card to create
+the OAuth client, so it was dropped rather than requiring payment info
+for a "free" auth setup. Nothing about the architecture below assumes
+OAuth is coming back, but adding a provider later is a small, additive
+change (one more entry in `providers: []`) if it's ever worth it.
+
+- **`lib/auth.ts`** — the whole Auth.js config: a Credentials provider
+  that checks email + bcrypt-hashed password against the `users` table.
+  Session strategy is JWT — required by Auth.js for Credentials
+  providers, since there's no server-side session row to check a
+  password against.
+- **`app/api/auth/[...nextauth]/route.ts`** — Auth.js's own routes
+  (credentials POST, sign-out, session fetch). Nothing else in the app
+  calls these directly.
+- **`app/api/auth/register/route.ts`** — creates an account: bcrypt hash
+  (12 rounds), rate-limited, generic "email already registered" error
+  that doesn't reveal whether the collision is real.
+- **`middleware.ts`** — the single gate. Blocks every unauthenticated
+  request to any page or `/api/*` route except `/login`, `/register`,
+  and `/api/auth/*` itself — pages redirect to `/login?callbackUrl=...`,
+  API requests get a 401 JSON body. This is why none of the ~10 existing
+  route handlers needed to change: `resolveSession()` in
+  `lib/security/session.ts` now reads the Auth.js session instead of the
+  old cookie, but keeps the exact same `{ userId }` shape, so every route
+  that already called it just keeps working.
+- **`app/login/page.tsx`** / **`app/register/page.tsx`** — plain
+  email/password forms. Registering signs the person in immediately
+  rather than sending them back to a login form.
+- **Sidebar footer** now shows the signed-in email/name and a real
+  "Keluar" (sign out) button.
+- **"Hapus semua data" now signs the user out** instead of just
+  redirecting to `/` — deleting the `User` row leaves the old session
+  JWT pointing at an account that no longer exists, so `signOut()`
+  clears it properly rather than leaving a stale token that would 401
+  on the next request.
+- **Anonymous sessions are gone entirely**, on purpose (nothing carried
+  over) — every route now requires a real signed-in user.
 
 ## Debugging via GitHub Actions
 
@@ -574,10 +626,13 @@ also be another place your production schema gets touched from.
   corrects it client-side after mount rather than reading the theme
   cookie during SSR. A deliberate trade-off for one settings field, not
   an oversight.
-- No real authentication — history is scoped to an anonymous cookie
-  (see `lib/security/session.ts`), which means it's per-browser, not
-  per-account, until Phase 8. Clearing cookies loses access to the
-  history (the data isn't deleted, just no longer reachable).
+- No password reset flow yet — a forgotten password currently means no
+  way back into that account. Worth adding (a token emailed via any
+  transactional-email provider) before depending on this for real users.
+- No email verification on sign-up — an account works immediately
+  without confirming the address is real/owned by the signer-upper.
+- No social login (Google/GitHub/etc.) — deliberately email/password
+  only, see Phase 11 above for why.
 - No message editing yet (only regenerate). Rename uses a plain
   `window.prompt` for now rather than an inline field — fine to start,
   worth a proper input once Settings/polish work happens.

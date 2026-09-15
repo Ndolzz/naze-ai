@@ -59,10 +59,28 @@ const config: Config = {
           "0%": { backgroundPosition: "0% 50%" },
           "100%": { backgroundPosition: "200% 50%" },
         },
+        // Bolder version of rise-in for full-page entrances (login/
+        // register) where the app wants a moment of arrival, not the
+        // barely-there lift chat bubbles use. More travel distance
+        // (20px vs 6px), a touch of scale, and a longer duration.
+        "rise-in-lg": {
+          "0%": { opacity: "0", transform: "translateY(20px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        // The wordmark's own entrance: overshoots slightly then settles,
+        // so it reads as arriving with a bit of energy rather than just
+        // fading up like everything under it.
+        "logo-pop": {
+          "0%": { opacity: "0", transform: "scale(0.4) rotate(-12deg)" },
+          "60%": { opacity: "1", transform: "scale(1.08) rotate(4deg)" },
+          "100%": { opacity: "1", transform: "scale(1) rotate(0deg)" },
+        },
       },
       animation: {
         "rise-in": "rise-in 220ms cubic-bezier(0.16, 1, 0.3, 1)",
         shimmer: "shimmer 2.4s linear infinite",
+        "rise-in-lg": "rise-in-lg 480ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "logo-pop": "logo-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) both",
       },
     },
   },

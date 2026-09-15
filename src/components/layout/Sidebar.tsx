@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Archive, Brain, Pin, PinOff, Plus, Search, Settings, Trash2, X } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Archive, Brain, LogOut, Pin, PinOff, Plus, Search, Settings, Trash2, X } from "lucide-react";
 import NazeMark from "@/components/ui/NazeMark";
 import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -44,6 +45,7 @@ export default function Sidebar({
   removeAll,
 }: SidebarProps) {
   const [query, setQuery] = useState("");
+  const { data: session } = useSession();
   const { results, searching } = useConversationSearch(query);
   const groups = groupConversationsByDate(conversations);
 
@@ -157,6 +159,22 @@ export default function Sidebar({
               className="w-full rounded-md px-2.5 py-2 text-left text-[13px] text-ink-faint transition-colors hover:bg-surface-raised hover:text-danger"
             >
               Hapus semua riwayat
+            </button>
+          </div>
+        )}
+
+        {session?.user && (
+          <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-3">
+            <span className="truncate text-[13px] text-ink-muted" title={session.user.email ?? undefined}>
+              {session.user.name || session.user.email}
+            </span>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              aria-label="Keluar"
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-[13px] text-ink-faint transition-colors hover:bg-surface-raised hover:text-ink"
+            >
+              <LogOut size={14} />
+              Keluar
             </button>
           </div>
         )}

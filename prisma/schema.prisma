@@ -23,13 +23,18 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-/// A browser/session identity. Not real authentication (that's Phase 8) —
-/// today this row is created the first time a visitor hits the app and is
-/// tracked via an anonymous httpOnly cookie (see lib/security/session.ts).
-/// When real auth lands, this becomes the row a login attaches to instead
-/// of being replaced.
+/// A real account (Phase 11 — Auth.js, email/password only). Created by
+/// /api/auth/register (bcrypt hash, never plaintext). Everything
+/// downstream (conversations, memories, settings) still hangs off this
+/// same User row exactly as it did in the anonymous-cookie era — only
+/// how the row gets attached to a request changed.
 model User {
   id            String         @id @default(cuid())
+  email         String?        @unique
+  /// bcrypt hash.
+  password      String?
+  name          String?
+  image         String?
   createdAt     DateTime       @default(now())
   conversations Conversation[]
   memories      Memory[]

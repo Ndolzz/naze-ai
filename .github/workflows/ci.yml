@@ -28,6 +28,10 @@ jobs:
     env:
       DATABASE_URL: "postgresql://user:password@localhost:5432/naze_ci"
       DIRECT_URL: "postgresql://user:password@localhost:5432/naze_ci"
+      # Fake but present — Auth.js (Phase 11) reads this at import time,
+      # so a build fails without *something* set here, even though no
+      # real auth flow ever runs during CI.
+      AUTH_SECRET: "ci-placeholder-secret-not-used-for-real-sessions"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
