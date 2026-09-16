@@ -24,7 +24,7 @@ const HISTORY_LIMIT = 20;
  *
  *   resolve session → rate limit → validate → load/create conversation
  *   → save the user's message → Context Builder (persona + relevant
- *   memory + recent turns, all read FROM the database) → Mistral →
+ *   memory + recent turns, all read FROM the database) → Gemini →
  *   stream to client while accumulating → save the assistant's message
  *   → Memory Analyzer decides create/update/delete/ignore
  *
@@ -166,7 +166,7 @@ function createPersistingStream({
     }
     // Settings §27/§40 (Memory toggle): if the person turned memory off,
     // skip the analyzer call entirely rather than running it and
-    // discarding the result — no point spending a Mistral call on a
+    // discarding the result — no point spending a Gemini call on a
     // decision nothing will act on.
     if (!memoryEnabled) return;
     try {

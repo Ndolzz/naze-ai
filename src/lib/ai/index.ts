@@ -1,5 +1,5 @@
 import { ChatProvider, ProviderError } from "@/lib/ai/types";
-import { MistralProvider } from "@/lib/ai/providers/mistral";
+import { GeminiProvider } from "@/lib/ai/providers/gemini";
 
 /**
  * Everything outside src/lib/ai calls this instead of constructing a
@@ -7,14 +7,14 @@ import { MistralProvider } from "@/lib/ai/providers/mistral";
  * change here, not a search-and-replace across the app.
  */
 export function getChatProvider(): ChatProvider {
-  const apiKey = process.env.MISTRAL_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new ProviderError(
-      "Server belum dikonfigurasi: MISTRAL_API_KEY kosong.",
+      "Server belum dikonfigurasi: GEMINI_API_KEY kosong.",
       500
     );
   }
-  return new MistralProvider(apiKey);
+  return new GeminiProvider(apiKey);
 }
 
 export * from "@/lib/ai/types";
