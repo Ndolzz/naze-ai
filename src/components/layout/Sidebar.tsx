@@ -25,7 +25,7 @@ interface SidebarProps {
 }
 
 /**
- * Real conversation history (spec §14/§15) — search, grouped-by-date
+ * Real conversation history (spec §14/§15): search, grouped-by-date
  * list, rename/pin/archive/delete per item. On desktop this is a fixed
  * 280px panel; on mobile it's an off-canvas drawer with a scrim. The list
  * itself is owned by the parent page (useConversations) so a send/refresh
@@ -65,16 +65,17 @@ export default function Sidebar({
         <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-border bg-surface transition-transform duration-200 md:static md:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={
+          "fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-border bg-surface transition-transform duration-200 md:static md:translate-x-0 " +
+          (open ? "translate-x-0" : "-translate-x-full")
+        }
       >
-        <div className="flex items-center gap-2 px-4 py-4">
+        <div className="enter flex items-center gap-2 px-4 py-4">
           <NazeMark size={24} />
-          <span className="font-display text-[15px] font-semibold text-ink">Naze</span>
+          <span className="font-display text-[16px] font-semibold text-ink">Naze</span>
         </div>
 
-        <div className="space-y-2 px-3">
+        <div className="enter space-y-2 px-3" style={{ animationDelay: "100ms" }}>
           <Button variant="secondary" className="w-full justify-start gap-2" onClick={onNewChat}>
             <Plus size={16} />
             Percakapan baru
@@ -98,7 +99,7 @@ export default function Sidebar({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari percakapan..."
+              placeholder="Cari percakapan"
               className="pl-8 text-[13px]"
             />
             {query && (
@@ -113,7 +114,10 @@ export default function Sidebar({
           </div>
         </div>
 
-        <nav className="mt-3 flex-1 overflow-y-auto px-3 pb-3">
+        <nav
+          className="enter mt-3 flex-1 overflow-y-auto px-3 pb-3"
+          style={{ animationDelay: "180ms" }}
+        >
           {query ? (
             <SearchResults
               query={query}
@@ -139,7 +143,7 @@ export default function Sidebar({
                     onTogglePin={() => togglePinned(c.id, !c.pinned)}
                     onArchive={() => setArchived(c.id, true)}
                     onDelete={() => {
-                      if (window.confirm(`Hapus "${c.title}"?`)) remove(c.id);
+                      if (window.confirm('Hapus "' + c.title + '"?')) remove(c.id);
                     }}
                   />
                 ))}
@@ -225,9 +229,10 @@ export function SidebarItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full truncate rounded-md px-2.5 py-2 text-left text-[14px] transition-colors duration-150 ${
-        active ? "bg-accent-soft text-ink" : "text-ink-muted hover:bg-surface-raised hover:text-ink"
-      }`}
+      className={
+        "w-full truncate rounded-md px-2.5 py-2 text-left text-[14px] transition-colors duration-150 " +
+        (active ? "bg-accent-soft text-ink" : "text-ink-muted hover:bg-surface-raised hover:text-ink")
+      }
     >
       {children}
     </button>
@@ -255,15 +260,18 @@ function SidebarConversationItem({
 }) {
   return (
     <div
-      className={`group flex items-center rounded-md ${active ? "bg-accent-soft" : "hover:bg-surface-raised"}`}
+      className={
+        "group flex items-center rounded-md " + (active ? "bg-accent-soft" : "hover:bg-surface-raised")
+      }
     >
       <button
         onClick={onSelect}
         onDoubleClick={onRename}
         title="Klik dua kali untuk ganti nama"
-        className={`min-w-0 flex-1 truncate px-2.5 py-2 text-left text-[14px] ${
-          active ? "text-ink" : "text-ink-muted group-hover:text-ink"
-        }`}
+        className={
+          "min-w-0 flex-1 truncate px-2.5 py-2 text-left text-[14px] " +
+          (active ? "text-ink" : "text-ink-muted group-hover:text-ink")
+        }
       >
         {title}
       </button>
@@ -300,9 +308,12 @@ function RowIcon({
         e.stopPropagation();
         onClick();
       }}
-      className={`grid h-8 w-8 place-items-center rounded transition-colors ${
-        danger ? "text-ink-faint hover:bg-danger/10 hover:text-danger" : "text-ink-faint hover:bg-surface hover:text-ink"
-      }`}
+      className={
+        "grid h-8 w-8 place-items-center rounded transition-colors " +
+        (danger
+          ? "text-ink-faint hover:bg-danger/10 hover:text-danger"
+          : "text-ink-faint hover:bg-surface hover:text-ink")
+      }
     >
       {children}
     </button>

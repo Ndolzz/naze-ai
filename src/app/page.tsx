@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 
 // CallScreen is only needed once someone actually opens Call, and it's
 // browser-API-only anyway (SpeechRecognition/speechSynthesis don't exist
-// during SSR) — ssr:false keeps it out of the initial page bundle
+// during SSR). ssr:false keeps it out of the initial page bundle
 // entirely instead of shipping it to everyone who never taps the mic.
 const CallScreen = dynamic(() => import("@/components/voice/CallScreen"), { ssr: false });
 import ErrorNotice from "@/components/chat/ErrorNotice";
@@ -154,7 +154,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-dvh bg-canvas">
+    <div className="flex h-dvh">
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -173,11 +173,11 @@ export default function Home() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-3 border-b border-border px-4 py-3 md:hidden">
+        <header className="enter flex items-center gap-3 border-b border-border px-4 py-3 md:hidden">
           <button
             aria-label="Buka daftar percakapan"
             onClick={() => setSidebarOpen(true)}
-            className="grid h-10 w-10 place-items-center rounded-md text-ink-muted hover:bg-surface-raised hover:text-ink"
+            className="grid h-10 w-10 place-items-center rounded-md text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
               <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
@@ -190,9 +190,19 @@ export default function Home() {
         <main className="mx-auto flex w-full max-w-thread flex-1 flex-col gap-6 overflow-y-auto px-4 py-8">
           {messages.length === 0 && !stream.isStreaming && !stream.error && !loadingConversation && !imageGenerating && (
             <div className="m-auto flex flex-col items-center gap-3 text-center">
-              <NazeMark size={40} />
-              <p className="font-display text-lg font-semibold text-ink">Mulai percakapan dengan Naze</p>
-              <p className="max-w-xs text-[14px] text-ink-muted">
+              <div className="animate-logo-pop">
+                <NazeMark size={44} />
+              </div>
+              <p
+                className="enter font-display text-xl font-semibold text-ink"
+                style={{ animationDelay: "160ms" }}
+              >
+                Mulai percakapan dengan Naze
+              </p>
+              <p
+                className="enter max-w-xs text-[14px] text-ink-muted"
+                style={{ animationDelay: "260ms" }}
+              >
                 Tanya apa saja, atau tekan ikon gambar untuk minta Naze membuatkan gambar.
               </p>
             </div>
