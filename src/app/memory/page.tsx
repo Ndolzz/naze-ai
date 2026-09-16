@@ -13,32 +13,32 @@ export default function MemoryPage() {
   const { memories, loading, update, remove, removeAll } = useMemories(query);
 
   return (
-    <div className="min-h-dvh bg-canvas">
-      <header className="mx-auto flex max-w-thread items-center gap-3 px-4 py-4">
+    <div className="min-h-dvh">
+      <header className="enter mx-auto flex max-w-thread items-center gap-3 px-4 py-4">
         <Link
           href="/"
           aria-label="Kembali ke percakapan"
-          className="grid h-10 w-10 place-items-center rounded-md text-ink-muted hover:bg-surface-raised hover:text-ink"
+          className="grid h-10 w-10 place-items-center rounded-md text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
         >
           <ArrowLeft size={18} />
         </Link>
         <NazeMark size={22} />
-        <h1 className="font-display text-[15px] font-semibold text-ink">Memori Naze</h1>
+        <h1 className="font-display text-[17px] font-semibold text-ink">Memori Naze</h1>
       </header>
 
       <main className="mx-auto max-w-thread px-4 pb-16">
-        <p className="mb-5 text-[13.5px] text-ink-muted">
-          Ini hal-hal yang diingat Naze tentang kamu dari percakapan sebelumnya — terpisah dari
-          riwayat chat. Kamu bisa lihat, ubah, atau hapus apa saja di sini.
+        <p className="enter mb-5 text-[13.5px] text-ink-muted" style={{ animationDelay: "120ms" }}>
+          Ini hal-hal yang diingat Naze tentang kamu dari percakapan sebelumnya, terpisah
+          dari riwayat chat. Kamu bisa lihat, ubah, atau hapus apa saja di sini.
         </p>
 
-        <div className="mb-5 flex items-center gap-2">
+        <div className="enter mb-5 flex items-center gap-2" style={{ animationDelay: "200ms" }}>
           <div className="relative flex-1">
             <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari memori..."
+              placeholder="Cari memori"
               className="pl-8"
             />
             {query && (
@@ -77,7 +77,7 @@ export default function MemoryPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="stagger space-y-2">
             {memories.map((m) => (
               <MemoryCard key={m.id} memory={m} onUpdate={update} onDelete={remove} />
             ))}

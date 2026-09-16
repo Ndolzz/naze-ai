@@ -18,7 +18,7 @@ interface ComposerProps {
 
 /**
  * Layout and states per spec §23. The mic button opens the full-screen
- * Call UI (spec §19) — real as of Phase 7, not a placeholder anymore.
+ * Call UI (spec §19), real as of Phase 7, not a placeholder anymore.
  */
 export default function Composer({
   value,
@@ -40,7 +40,10 @@ export default function Composer({
   };
 
   return (
-    <div className="border-t border-border bg-canvas px-4 pb-[env(safe-area-inset-bottom)] pt-3 md:px-0">
+    <div
+      className="enter border-t border-border px-4 pb-[env(safe-area-inset-bottom)] pt-3 md:px-0"
+      style={{ animationDelay: "320ms" }}
+    >
       <div className="mx-auto flex max-w-thread items-end gap-2 rounded-lg border border-border-strong bg-surface p-2">
         <IconButton
           label={imageMode ? "Batalkan mode gambar" : "Buat gambar"}
@@ -56,7 +59,7 @@ export default function Composer({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={imageMode ? "Jelaskan gambar yang mau dibuat..." : "Tulis pesan untuk Naze..."}
+          placeholder={imageMode ? "Jelaskan gambar yang ingin dibuat" : "Tulis pesan untuk Naze"}
           className="max-h-40 min-h-[40px] border-none bg-transparent px-1 py-2 focus:border-none"
         />
 
@@ -95,16 +98,17 @@ function IconButton({
       aria-label={label}
       aria-pressed={active}
       onClick={onClick}
-      className={`grid h-10 w-10 shrink-0 place-items-center rounded-md transition-colors duration-150 ${
-        active ? "bg-accent-soft text-accent" : "text-ink-muted hover:bg-surface-raised hover:text-ink"
-      }`}
+      className={
+        "grid h-10 w-10 shrink-0 place-items-center rounded-md transition-colors duration-150 " +
+        (active ? "bg-accent-soft text-accent" : "text-ink-muted hover:bg-surface-raised hover:text-ink")
+      }
     >
       {children}
     </button>
   );
 }
 
-/* Inline SVG for the one icon lucide doesn't need to cover here — kept
+/* Inline SVG for the one icon lucide doesn't need to cover here, kept
    consistent with spec §35 (no keyboard emoji) either way. */
 function MicIcon() {
   return (

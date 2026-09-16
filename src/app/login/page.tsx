@@ -33,14 +33,14 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
+    <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-2">
           <div className="animate-logo-pop">
             <NazeMark size={36} />
           </div>
           <h1
-            className="animate-rise-in-lg font-display text-xl font-semibold text-ink"
+            className="animate-rise-in-lg font-display text-2xl font-semibold text-ink"
             style={{ animationDelay: "120ms" }}
           >
             Masuk ke Naze
@@ -75,7 +75,7 @@ function LoginForm() {
             </div>
           )}
           <Button type="submit" className="w-full justify-center" disabled={loading}>
-            {loading ? "Masuk..." : "Masuk"}
+            {loading ? "Memeriksa..." : "Masuk"}
           </Button>
         </form>
 
