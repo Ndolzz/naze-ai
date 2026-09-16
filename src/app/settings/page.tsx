@@ -8,30 +8,44 @@ import NazeMark from "@/components/ui/NazeMark";
 import Toggle from "@/components/ui/Toggle";
 import Button from "@/components/ui/Button";
 import { useSettings } from "@/features/settings/useSettings";
+import { AccentId } from "@/lib/settings/types";
+
+/**
+ * Preview dots for the accent picker. The hex values are only for the
+ * swatches themselves; the real theming happens through the
+ * [data-accent] rules in globals.css.
+ */
+const ACCENT_SWATCHES: { id: AccentId; label: string; color: string }[] = [
+  { id: "royal", label: "Royal", color: "#6a5cff" },
+  { id: "emerald", label: "Emerald", color: "#10b981" },
+  { id: "sapphire", label: "Safir", color: "#3b82f6" },
+  { id: "gold", label: "Emas", color: "#d4af37" },
+  { id: "rose", label: "Mawar", color: "#ec6f9c" },
+];
 
 export default function SettingsPage() {
   const { settings, loading, update } = useSettings();
 
   return (
-    <div className="min-h-dvh bg-canvas">
-      <header className="mx-auto flex max-w-thread items-center gap-3 px-4 py-4">
+    <div className="min-h-dvh">
+      <header className="enter mx-auto flex max-w-thread items-center gap-3 px-4 py-4">
         <Link
           href="/"
           aria-label="Kembali ke percakapan"
-          className="grid h-10 w-10 place-items-center rounded-md text-ink-muted hover:bg-surface-raised hover:text-ink"
+          className="grid h-10 w-10 place-items-center rounded-md text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
         >
           <ArrowLeft size={18} />
         </Link>
         <NazeMark size={22} />
-        <h1 className="font-display text-[15px] font-semibold text-ink">Pengaturan</h1>
+        <h1 className="font-display text-[17px] font-semibold text-ink">Pengaturan</h1>
       </header>
 
-      <main className="mx-auto max-w-thread space-y-5 px-4 pb-16">
+      <main className="mx-auto max-w-thread px-4 pb-16">
         {loading ? (
           <p className="text-[14px] text-ink-faint">Memuat...</p>
         ) : (
-          <>
-            <Section title="Tampilan" description="Tema untuk seluruh aplikasi.">
+          <div className="stagger space-y-5">
+            <Section title="Tampilan" description="Tema dan warna untuk seluruh aplikasi.">
               <Row
                 label="Tema terang"
                 description="Naze memakai tema gelap secara default."
@@ -46,12 +60,27 @@ export default function SettingsPage() {
                   label="Tema terang"
                 />
               </Row>
+              <div className="border-t border-border">
+                <div className="px-4 pt-3">
+                  <p className="text-[14px] text-ink">Warna aksen</p>
+                  <p className="mt-0.5 text-[12.5px] text-ink-faint">
+                    Warna utama untuk tombol, sorotan, dan identitas Naze.
+                  </p>
+                </div>
+                <AccentPicker
+                  value={settings.accent}
+                  onChange={(accent) => {
+                    document.documentElement.dataset.accent = accent;
+                    update({ accent });
+                  }}
+                />
+              </div>
             </Section>
 
             <Section title="Memori" description="Kontrol apa yang Naze boleh ingat jangka panjang.">
               <Row
                 label="Aktifkan memori"
-                description="Kalau dimatikan, Naze berhenti menyimpan dan membaca memori sama sekali — bukan cuma disembunyikan dari tampilan."
+                description="Kalau dimatikan, Naze berhenti menyimpan dan membaca memori sama sekali, bukan hanya menyembunyikannya dari tampilan."
               >
                 <Toggle
                   checked={settings.memoryEnabled}
@@ -63,7 +92,7 @@ export default function SettingsPage() {
                 href="/memory"
                 className="block px-4 py-3 text-[13.5px] text-accent-text transition-colors hover:bg-surface-raised"
               >
-                Lihat &amp; kelola memori tersimpan →
+                Kelola memori tersimpan
               </Link>
             </Section>
 
@@ -85,16 +114,16 @@ export default function SettingsPage() {
                 />
               </div>
               <p className="border-t border-border px-4 py-3 text-[13px] text-ink-faint">
-                Naze Call memakai fitur suara bawaan browser — dukungan terbaik di Chrome/Edge.
-                Firefox belum mendukung pengenalan suara sama sekali.
+                Naze Call memakai fitur suara bawaan browser. Dukungan terbaik ada di Chrome
+                dan Edge. Firefox belum mendukung pengenalan suara.
               </p>
             </Section>
 
             <Section title="Privasi" description="Bagaimana Naze mengenali kamu saat ini.">
               <p className="px-4 py-3 text-[13.5px] leading-relaxed text-ink-muted">
-                Percakapan dan memori kamu terikat ke akun yang login (email/
-                password), bukan lagi ke satu browser. Login dari perangkat lain dengan akun yang
-                sama akan menampilkan riwayat yang sama.
+                Percakapan dan memori kamu terikat ke akun yang login (email dan password),
+                bukan lagi ke satu browser. Login dari perangkat lain dengan akun yang sama
+                akan menampilkan riwayat yang sama.
               </p>
             </Section>
 
@@ -102,15 +131,48 @@ export default function SettingsPage() {
 
             <Section title="Tentang">
               <p className="px-4 py-3 text-[13.5px] leading-relaxed text-ink-muted">
-                Naze AI — dibangun ulang dari nol lewat 8 fase: Foundation, Chat UI, Backend,
-                Database, Memory, Image Generation, Voice/Call, dan Settings ini. Model teks:
-                Mistral. Gambar: Pollinations (gratis). Suara: Web Speech API bawaan browser
-                (gratis).
+                Naze AI dikembangkan melalui delapan fase: Foundation, Chat UI, Backend,
+                Database, Memory, Image Generation, Voice, dan Settings. Model teks:
+                Gemini 3.6 Flash. Gambar: Pollinations. Suara: Web Speech API bawaan
+                browser.
               </p>
             </Section>
-          </>
+          </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function AccentPicker({
+  value,
+  onChange,
+}: {
+  value: AccentId;
+  onChange: (id: AccentId) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 px-4 pb-4 pt-2">
+      {ACCENT_SWATCHES.map((s) => {
+        const active = value === s.id;
+        return (
+          <button
+            key={s.id}
+            type="button"
+            aria-label={"Warna aksen " + s.label}
+            aria-pressed={active}
+            title={s.label}
+            onClick={() => onChange(s.id)}
+            className="h-9 w-9 rounded-full transition-transform duration-200 hover:scale-110"
+            style={{
+              backgroundColor: s.color,
+              boxShadow: active
+                ? "0 0 0 3px var(--naze-surface), 0 0 0 5px " + s.color
+                : "0 0 0 1px var(--naze-border-strong)",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -146,7 +208,7 @@ function DataSection() {
   const deleteEverything = async () => {
     if (
       !window.confirm(
-        "Hapus SEMUA data — percakapan, memori, dan pengaturan? Ini akan memulai sesi baru dari nol dan tidak bisa dibatalkan."
+        "Hapus SEMUA data: percakapan, memori, dan pengaturan? Ini akan memulai sesi baru dari nol dan tidak bisa dibatalkan."
       )
     )
       return;
@@ -154,10 +216,10 @@ function DataSection() {
     try {
       await fetch("/api/data", { method: "DELETE" });
       // The User row itself was just deleted, so the current session JWT
-      // now points at nothing — signOut() clears it properly instead of
+      // now points at nothing. signOut() clears it properly instead of
       // leaving the browser holding a token for an account that no
       // longer exists (which would otherwise 401 on the very next API
-      // call, or worse, silently attach a *new* random account to it).
+      // call, or worse, silently attach a new random account to it).
       await signOut({ callbackUrl: "/login" });
     } finally {
       setBusy(null);
