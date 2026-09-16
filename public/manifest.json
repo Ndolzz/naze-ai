@@ -1,7 +1,7 @@
 {
   "name": "Naze AI",
   "short_name": "Naze",
-  "description": "Naze \u2014 asisten AI pribadi yang mengenal konteks percakapanmu.",
+  "description": "Naze, asisten AI pribadi yang mengenal konteks percakapanmu.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0b0d14",

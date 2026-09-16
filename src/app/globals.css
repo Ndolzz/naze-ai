@@ -3,12 +3,17 @@
 @tailwind utilities;
 
 /*
-  Naze design tokens
-  ------------------
-  Dark is the primary surface (see spec §28). Values are deliberately not
-  pure black / pure white — a near-navy canvas keeps the blue-violet accent
-  from turning into an "acid accent on #000" cliché, and gives the UI a
-  slight warmth instead of a flat SaaS-dashboard gray.
+  Naze design tokens.
+
+  Dark is the primary surface. Values are deliberately not pure black or
+  pure white: a near navy canvas keeps the accent from turning into an
+  "acid accent on #000" cliche and gives the UI a slight warmth instead
+  of a flat SaaS dashboard gray.
+
+  Accent colors are runtime swappable: the [data-accent] blocks below
+  override the accent tokens, and the Pengaturan page lets each user
+  pick their own palette (stored per account in the settings table and
+  applied to <html> by ThemeSync).
 */
 
 :root,
@@ -20,17 +25,10 @@
   --naze-border-strong: #2f3650;
   --naze-ink: #eef0f8;
   --naze-ink-muted: #9aa0b8;
-  /* Was #5c6280 (~3.1:1 on surface) — failed WCAG AA for the normal
-     body text it's actually used as (empty states, descriptions,
-     labels), not just icons/borders. Same hue, lightened to clear
-     4.5:1 on both canvas and surface. */
   --naze-ink-faint: #79809f;
   --naze-accent: #6a5cff;
   --naze-accent-hover: #7d70ff;
   --naze-accent-soft: rgba(106, 92, 255, 0.14);
-  /* Text-safe variant of --naze-accent (4.24:1 — fine for icons/buttons,
-     which only need 3:1, but not quite 4.5:1 for the small link/label
-     text a couple of components set in this color). */
   --naze-accent-text: #8175ff;
   --naze-accent-2: #4a7dff;
   --naze-success: #34c98e;
@@ -46,18 +44,80 @@
   --naze-border-strong: #d2d4e4;
   --naze-ink: #14151f;
   --naze-ink-muted: #5a5d75;
-  /* Was #8a8da3 (~3.27:1 on white) — same AA failure as the dark theme,
-     fixed the same way. */
   --naze-ink-faint: #6c6f89;
   --naze-accent: #5b4bf0;
   --naze-accent-hover: #4c3ce0;
   --naze-accent-soft: rgba(91, 75, 240, 0.1);
-  /* Already ≥4.5:1 on white, so no separate text variant needed here. */
   --naze-accent-text: #5b4bf0;
   --naze-accent-2: #3a63e8;
   --naze-success: #1f9d6f;
   --naze-warning: #b3791f;
   --naze-danger: #d13a4f;
+}
+
+/*
+  Accent palettes. Selected in Pengaturan, applied as data-accent on
+  <html>. "royal" is the default and matches the tokens above, so it
+  needs no override block.
+*/
+[data-theme="dark"][data-accent="emerald"] {
+  --naze-accent: #10b981;
+  --naze-accent-hover: #2fcf9a;
+  --naze-accent-soft: rgba(16, 185, 129, 0.14);
+  --naze-accent-text: #3ddba0;
+  --naze-accent-2: #14b8a6;
+}
+[data-theme="light"][data-accent="emerald"] {
+  --naze-accent: #059669;
+  --naze-accent-hover: #047857;
+  --naze-accent-soft: rgba(5, 150, 105, 0.1);
+  --naze-accent-text: #059669;
+  --naze-accent-2: #0d9488;
+}
+
+[data-theme="dark"][data-accent="sapphire"] {
+  --naze-accent: #3b82f6;
+  --naze-accent-hover: #5c9bff;
+  --naze-accent-soft: rgba(59, 130, 246, 0.15);
+  --naze-accent-text: #6ea3ff;
+  --naze-accent-2: #818cf8;
+}
+[data-theme="light"][data-accent="sapphire"] {
+  --naze-accent: #2563eb;
+  --naze-accent-hover: #1d4ed8;
+  --naze-accent-soft: rgba(37, 99, 235, 0.1);
+  --naze-accent-text: #2563eb;
+  --naze-accent-2: #4f46e5;
+}
+
+[data-theme="dark"][data-accent="gold"] {
+  --naze-accent: #d4af37;
+  --naze-accent-hover: #e0c05c;
+  --naze-accent-soft: rgba(212, 175, 55, 0.15);
+  --naze-accent-text: #dcb95d;
+  --naze-accent-2: #e8cf85;
+}
+[data-theme="light"][data-accent="gold"] {
+  --naze-accent: #a8842a;
+  --naze-accent-hover: #8f6f22;
+  --naze-accent-soft: rgba(168, 132, 42, 0.12);
+  --naze-accent-text: #a8842a;
+  --naze-accent-2: #c9a537;
+}
+
+[data-theme="dark"][data-accent="rose"] {
+  --naze-accent: #ec6f9c;
+  --naze-accent-hover: #f08cb1;
+  --naze-accent-soft: rgba(236, 111, 156, 0.15);
+  --naze-accent-text: #f095b8;
+  --naze-accent-2: #d65d8c;
+}
+[data-theme="light"][data-accent="rose"] {
+  --naze-accent: #d14d7f;
+  --naze-accent-hover: #b93e6d;
+  --naze-accent-soft: rgba(209, 77, 127, 0.1);
+  --naze-accent-text: #d14d7f;
+  --naze-accent-2: #c2437a;
 }
 
 * {
@@ -67,14 +127,21 @@
 html {
   color-scheme: dark;
 }
-[data-theme="light"] html {
+html[data-theme="light"] {
   color-scheme: light;
 }
 
 body {
   background-color: var(--naze-canvas);
+  /* Ambient elegance: two very subtle accent glows anchored to opposite
+     corners. Purely decorative. Pages must not paint an opaque canvas
+     color over the body or the glow disappears. */
+  background-image:
+    radial-gradient(52rem 34rem at 85% -10%, var(--naze-accent-soft), transparent 70%),
+    radial-gradient(44rem 30rem at -12% 108%, var(--naze-accent-soft), transparent 70%);
+  background-attachment: fixed;
   color: var(--naze-ink);
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  transition: background-color 400ms ease, color 400ms ease;
 }
 
 /* One deliberate, visible focus treatment used everywhere instead of the
@@ -91,9 +158,44 @@ body {
 }
 
 /*
+  Entrance choreography: a soft rise combined with a focus pull (blur to
+  sharp). .enter animates one element; .stagger cascades direct children
+  with increasing delays. Use sparingly: an entrance should feel like the
+  app arriving, not performing.
+*/
+@keyframes naze-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.enter {
+  animation: naze-enter 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.stagger > * {
+  animation: naze-enter 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 50ms; }
+.stagger > *:nth-child(2) { animation-delay: 120ms; }
+.stagger > *:nth-child(3) { animation-delay: 190ms; }
+.stagger > *:nth-child(4) { animation-delay: 260ms; }
+.stagger > *:nth-child(5) { animation-delay: 330ms; }
+.stagger > *:nth-child(6) { animation-delay: 400ms; }
+.stagger > *:nth-child(7) { animation-delay: 470ms; }
+.stagger > *:nth-child(8) { animation-delay: 540ms; }
+
+/*
   Syntax highlighting (rehype-highlight / highlight.js class names).
-  Mapped to Naze tokens directly rather than importing a stock hljs theme,
-  so code blocks never clash with the rest of the palette.
+  Mapped to Naze tokens directly rather than importing a stock hljs
+  theme, so code blocks never clash with the rest of the palette.
 */
 .hljs {
   color: var(--naze-ink);

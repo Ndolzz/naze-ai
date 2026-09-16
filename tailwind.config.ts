@@ -1,8 +1,9 @@
 import type { Config } from "tailwindcss";
 
-// Naze design tokens — see src/app/globals.css for the CSS-variable source of truth.
-// Colors are also exposed as CSS variables so runtime theming (light/dark) works
-// without a Tailwind rebuild.
+// Naze design tokens. See src/app/globals.css for the CSS-variable source
+// of truth. Colors are also exposed as CSS variables so runtime theming
+// (dark/light plus the accent picker in Pengaturan) works without a
+// Tailwind rebuild.
 const config: Config = {
   darkMode: ["class"],
   content: [
@@ -33,8 +34,8 @@ const config: Config = {
         danger: "var(--naze-danger)",
       },
       fontFamily: {
-        display: ["var(--font-sora)", "system-ui", "sans-serif"],
-        sans: ["var(--font-jakarta)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-jetbrains)", "ui-monospace", "monospace"],
       },
       borderRadius: {
@@ -51,21 +52,22 @@ const config: Config = {
         thread: "42rem",
       },
       keyframes: {
+        // Small inline entrances (chat bubbles, notices): a barely-there
+        // lift plus a quick focus pull so new content arrives crisp.
         "rise-in": {
-          "0%": { opacity: "0", transform: "translateY(6px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
+          "0%": { opacity: "0", transform: "translateY(8px)", filter: "blur(4px)" },
+          "100%": { opacity: "1", transform: "translateY(0)", filter: "blur(0)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "0% 50%" },
           "100%": { backgroundPosition: "200% 50%" },
         },
-        // Bolder version of rise-in for full-page entrances (login/
-        // register) where the app wants a moment of arrival, not the
-        // barely-there lift chat bubbles use. More travel distance
-        // (20px vs 6px), a touch of scale, and a longer duration.
+        // Full-page entrances (login/register) where the app wants a
+        // moment of arrival: more travel, a touch of scale, a deeper
+        // blur that resolves as it lands.
         "rise-in-lg": {
-          "0%": { opacity: "0", transform: "translateY(20px) scale(0.98)" },
-          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+          "0%": { opacity: "0", transform: "translateY(24px) scale(0.985)", filter: "blur(12px)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)", filter: "blur(0)" },
         },
         // The wordmark's own entrance: overshoots slightly then settles,
         // so it reads as arriving with a bit of energy rather than just
@@ -77,9 +79,9 @@ const config: Config = {
         },
       },
       animation: {
-        "rise-in": "rise-in 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "rise-in": "rise-in 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         shimmer: "shimmer 2.4s linear infinite",
-        "rise-in-lg": "rise-in-lg 480ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "rise-in-lg": "rise-in-lg 640ms cubic-bezier(0.22, 1, 0.36, 1) both",
         "logo-pop": "logo-pop 620ms cubic-bezier(0.34, 1.56, 0.64, 1) both",
       },
     },

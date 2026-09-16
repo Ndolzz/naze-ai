@@ -1,25 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import ThemeSync from "@/components/ThemeSync";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import AuthProvider from "@/components/AuthProvider";
 import "./globals.css";
 
-// Display family — used for the wordmark, section headlines and empty states.
-const sora = Sora({
+// Display family: an elegant editorial serif for the wordmark, section
+// headlines, and empty states.
+const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
-  variable: "--font-sora",
+  variable: "--font-display",
 });
 
-// Reading family — chat messages, UI labels, everything else.
-const jakarta = Plus_Jakarta_Sans({
+// Reading family: chat messages, UI labels, everything else.
+const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-jakarta",
+  variable: "--font-sans",
 });
 
-// Functional monospace — code blocks and technical labels only.
+// Functional monospace: code blocks and technical labels only.
 const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
@@ -28,7 +29,7 @@ const jetbrains = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Naze",
-  description: "Naze — asisten AI pribadi yang mengenal konteks percakapanmu.",
+  description: "Naze, asisten AI pribadi yang mengenal konteks percakapanmu.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -51,9 +52,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" data-theme="dark">
+    <html lang="id" data-theme="dark" data-accent="royal">
       <body
-        className={`${sora.variable} ${jakarta.variable} ${jetbrains.variable} font-sans antialiased`}
+        className={
+          playfair.variable +
+          " " +
+          inter.variable +
+          " " +
+          jetbrains.variable +
+          " font-sans antialiased"
+        }
       >
         <AuthProvider>
           <ThemeSync />

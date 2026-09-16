@@ -3,12 +3,12 @@
 import { useEffect } from "react";
 
 /**
- * `layout.tsx` renders with `data-theme="dark"` on the server (so there's
- * no unstyled flash for the common case). This just corrects it to
- * "light" after mount if that's what's actually stored — a brief flash
- * of dark-before-light for light-theme users on first load is an
- * accepted trade-off rather than adding cookie-based SSR theme reading
- * for one settings field.
+ * `layout.tsx` renders with `data-theme="dark"` and `data-accent="royal"`
+ * on the server (so there's no unstyled flash for the common case). This
+ * corrects both after mount to whatever is actually stored for the
+ * account. A brief flash of the default look for users who changed either
+ * is an accepted trade-off rather than adding cookie-based SSR reading
+ * for two settings fields.
  */
 export default function ThemeSync() {
   useEffect(() => {
@@ -18,9 +18,12 @@ export default function ThemeSync() {
         if (data?.settings?.theme === "light") {
           document.documentElement.dataset.theme = "light";
         }
+        if (typeof data?.settings?.accent === "string") {
+          document.documentElement.dataset.accent = data.settings.accent;
+        }
       })
       .catch(() => {
-        // Non-critical — worst case the page just stays on the default theme.
+        // Non-critical. Worst case the page stays on the default look.
       });
   }, []);
 
